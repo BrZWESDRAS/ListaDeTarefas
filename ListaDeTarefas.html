@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lista de Tarefas</title>
+<style>
+  body {
+    margin:0; min-height:100vh;
+    display:flex; justify-content:center; align-items:center;
+    background: linear-gradient(135deg, #6fb1fc 0%, #4364f7 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color:#222;
+  }
+  .app {
+    background: linear-gradient(145deg, #ffffffdd, #e6f0ffdd);
+    padding: 1.5rem 2rem;
+    border-radius: 16px;
+    box-shadow:
+      0 4px 6px rgba(0,0,0,0.1),
+      0 8px 20px rgba(0,0,0,0.12);
+    width: 100%; max-width: 360px;
+    display:flex; flex-direction: column;
+    transition: box-shadow 0.3s ease;
+  }
+  .app:hover {
+    box-shadow:
+      0 8px 12px rgba(0,0,0,0.15),
+      0 16px 40px rgba(0,0,0,0.18);
+  }
+  h1 {
+    margin:0 0 1rem;
+    font-weight: 700;
+    font-size: 1.6rem;
+    text-align:center;
+    color: #1a2a6c;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  form {
+    display:flex;
+    gap:0.5rem;
+  }
+  input[type="text"] {
+    flex:1;
+    padding: 0.6rem 1rem;
+    border: 1.5px solid #aac8ff;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.25s, box-shadow 0.25s;
+    background: #f7fbff;
+  }
+  input[type="text"]:focus {
+    outline:none;
+    border-color: #357ABD;
+    box-shadow: 0 0 8px #357ABD88;
+  }
+  button {
+    padding: 0 1.1rem;
+    border:none;
+    background:#357ABD;
+    color:#fff;
+    border-radius: 8px;
+    cursor:pointer;
+    font-weight: 700;
+    font-size: 1.15rem;
+    transition: background-color 0.25s, box-shadow 0.25s;
+    user-select:none;
+  }
+  button:hover {
+    background:#235a8d;
+    box-shadow: 0 0 8px #235a8dcc;
+  }
+  ul {
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style:none;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  li {
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1px solid #cbd9ff;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    background: #f7faff;
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+  }
+  li:hover {
+    box-shadow: 0 6px 12px rgba(53, 122, 189, 0.3);
+    transform: translateY(-2px);
+  }
+  li.completed span.task-text {
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+  .task-content {
+    flex: 1;
+    margin-left: 0.5rem;
+    cursor: default;
+  }
+  button.remove {
+    background: transparent;
+    border:none;
+    color: #e74c3c;
+    font-weight: 700;
+    font-size: 1.3rem;
+    cursor: pointer;
+    line-height: 1;
+    user-select:none;
+    transition: color 0.25s;
+    margin-left: 0.5rem;
+  }
+  button.remove:hover {
+    color: #c0392b;
+  }
+  button.edit {
+    background: transparent;
+    border:none;
+    color: #357ABD;
+    font-weight: 700;
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    user-select:none;
+    transition: color 0.25s;
+    margin-left: 0.5rem;
+  }
+  button.edit:hover {
+    color: #235a8d;
+  }
+  input.edit-input {
+    font-size: 1rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 5px;
+    border: 1.5px solid #aac8ff;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  input.edit-input:focus {
+    outline:none;
+    border-color: #357ABD;
+    box-shadow: 0 0 8px #357ABD88;
+  }
+  label.checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select:none;
+  }
+  label.checkbox-container input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <main class="app">
+    <h1>Lista de Tarefas</h1>
+    <form id="form">
+      <input id="input" placeholder="Nova tarefa..." autocomplete="off" type="text" />
+      <button type="submit">+</button>
+    </form>
+    <ul id="list"></ul>
+  </main>
+
+<script>
+  const form = document.getElementById('form');
+  const input = document.getElementById('input');
+  const list = document.getElementById('list');
+
+  form.onsubmit = e => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return alert('Escreva algo!');
+    createTask(text);
+    input.value = '';
+    input.focus();
+  };
+
+  function createTask(text) {
+    const li = document.createElement('li');
+
+    const checkboxLabel = document.createElement('label');
+    checkboxLabel.className = 'checkbox-container';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+
+    checkboxLabel.appendChild(checkbox);
+
+    const span = document.createElement('span');
+    span.className = 'task-text';
+    span.textContent = text;
+
+    const taskContent = document.createElement('div');
+    taskContent.className = 'task-content';
+    taskContent.appendChild(span);
+
+    li.appendChild(checkboxLabel);
+    li.appendChild(taskContent);
+
+    
+    const editBtn = document.createElement('button');
+    editBtn.textContent = '✎';
+    editBtn.className = 'edit';
+    editBtn.title = 'Editar tarefa';
+
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = '×';
+    removeBtn.className = 'remove';
+    removeBtn.title = 'Remover tarefa';
+
+    li.appendChild(editBtn);
+    li.appendChild(removeBtn);
+
+    list.appendChild(li);
+
+    checkbox.onchange = () => {
+      li.classList.toggle('completed', checkbox.checked);
+    };
+
+    editBtn.onclick = () => {
+      if (li.querySelector('input.edit-input')) return; // Já em edição
+
+      const editInput = document.createElement('input');
+      editInput.type = 'text';
+      editInput.className = 'edit-input';
+      editInput.value = span.textContent;
+
+      taskContent.replaceChild(editInput, span);
+      editInput.focus();
+
+      
+      editInput.onkeydown = e => {
+        if (e.key === 'Enter') {
+          saveEdit();
+        } else if (e.key === 'Escape') {
+          cancelEdit();
+        }
+      };
+
+      
+      editInput.onblur = saveEdit;
+
+      function saveEdit() {
+        const newValue = editInput.value.trim();
+        if (newValue) {
+          span.textContent = newValue;
+        }
+        taskContent.replaceChild(span, editInput);
+      }
+
+      function cancelEdit() {
+        taskContent.replaceChild(span, editInput);
+      }
+    };
+
+    removeBtn.onclick = () => {
+      list.removeChild(li);
+    };
+  }
+</script>
+</body>
+</html>
